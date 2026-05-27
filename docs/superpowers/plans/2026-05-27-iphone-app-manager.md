@@ -33,8 +33,8 @@
 
 ## Task Status
 
-- [ ] Task 1: Project scaffold and initial failing tests.
-- [ ] Task 2: Parser and validation implementation.
+- [x] Task 1: Project scaffold and initial failing tests. Status: completed.
+- [x] Task 2: Parser and validation implementation. Status: completed.
 - [ ] Task 3: Device service implementation.
 - [ ] Task 4: Express API implementation.
 - [ ] Task 5: Frontend UI implementation.
@@ -50,7 +50,7 @@
 - Create: `test/validation.test.js`
 - Create: `test/ui-state.test.js`
 
-- [ ] **Step 1: Create package metadata**
+- [x] **Step 1: Create package metadata**
 
 Create `package.json`:
 
@@ -71,7 +71,7 @@ Create `package.json`:
 }
 ```
 
-- [ ] **Step 2: Write failing parser tests**
+- [x] **Step 2: Write failing parser tests**
 
 Create `test/parser.test.js`:
 
@@ -127,7 +127,7 @@ test("parseAppList parses comma-formatted ideviceinstaller rows", () => {
 });
 ```
 
-- [ ] **Step 3: Write failing validation tests**
+- [x] **Step 3: Write failing validation tests**
 
 Create `test/validation.test.js`:
 
@@ -174,7 +174,7 @@ test("normalizeDeleteSelection rejects invalid bundle IDs", () => {
 });
 ```
 
-- [ ] **Step 4: Write failing frontend helper tests**
+- [x] **Step 4: Write failing frontend helper tests**
 
 Create `test/ui-state.test.js`:
 
@@ -205,7 +205,7 @@ test("nextSelection toggles a bundle ID without mutating the original set", () =
 });
 ```
 
-- [ ] **Step 5: Install dependencies and verify tests fail for missing modules**
+- [x] **Step 5: Install dependencies and verify tests fail for missing modules**
 
 Run:
 
@@ -215,6 +215,8 @@ npm test
 ```
 
 Expected: `npm test` fails because `src/parser.js`, `src/validation.js`, and `public/ui-state.js` do not exist yet.
+
+Evidence: `npm install` completed with 68 packages added and 0 vulnerabilities. `npm test` exited 1 with expected `ERR_MODULE_NOT_FOUND` failures for `src/parser.js`, `src/validation.js`, and `public/ui-state.js`.
 
 ### Task 2: Parser And Validation Implementation
 
@@ -227,11 +229,11 @@ Expected: `npm test` fails because `src/parser.js`, `src/validation.js`, and `pu
 - Test: `test/validation.test.js`
 - Test: `test/ui-state.test.js`
 
-- [ ] **Step 1: Implement HTTP-aware validation error**
+- [x] **Step 1: Implement HTTP-aware validation error**
 
 Create `src/errors.js` with `AppError`, `ValidationError`, and `DeviceStateError`.
 
-- [ ] **Step 2: Implement app list parsing**
+- [x] **Step 2: Implement app list parsing**
 
 Create `src/parser.js` with:
 
@@ -240,7 +242,7 @@ Create `src/parser.js` with:
 - comma row parser for `bundle.id, 1.2.3, App Name`
 - sorting by app display name, then bundle ID
 
-- [ ] **Step 3: Implement delete payload validation**
+- [x] **Step 3: Implement delete payload validation**
 
 Create `src/validation.js` with `normalizeDeleteSelection(payload)`.
 
@@ -252,14 +254,14 @@ Validation rules:
 - Reject IDs that fail `/^[A-Za-z0-9][A-Za-z0-9.-]*$/`.
 - Deduplicate by bundle ID while preserving first name.
 
-- [ ] **Step 4: Implement frontend pure state helpers**
+- [x] **Step 4: Implement frontend pure state helpers**
 
 Create `public/ui-state.js` with:
 
 - `filterApps(apps, query)`
 - `nextSelection(selectedSet, bundleId, checked)`
 
-- [ ] **Step 5: Run focused tests**
+- [x] **Step 5: Run focused tests**
 
 Run:
 
@@ -268,6 +270,8 @@ npm test -- test/parser.test.js test/validation.test.js test/ui-state.test.js
 ```
 
 Expected: all focused tests pass.
+
+Evidence: `npm test -- test/parser.test.js test/validation.test.js test/ui-state.test.js` exited 0 with 8 tests passing and 0 failures.
 
 ### Task 3: Device Service Implementation
 

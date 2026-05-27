@@ -38,7 +38,7 @@
 - [x] Task 2: Parser and validation implementation. Status: completed.
 - [x] Task 3: Device service implementation. Status: completed.
 - [x] Task 4: Express API implementation. Status: completed.
-- [ ] Task 5: Frontend UI implementation.
+- [x] Task 5: Frontend UI implementation. Status: completed.
 - [ ] Task 6: Documentation, verification, and local server.
 
 ## Tasks
@@ -400,7 +400,7 @@ Evidence: first `npm test -- test/api.test.js` exited 1 with expected `ERR_MODUL
 - Create: `public/app.js`
 - Modify: `public/ui-state.js` only if UI helper coverage requires it.
 
-- [ ] **Step 1: Create app shell**
+- [x] **Step 1: Create app shell**
 
 Create `public/index.html` with:
 
@@ -413,7 +413,7 @@ Create `public/index.html` with:
 - delete confirmation dialog;
 - result panel.
 
-- [ ] **Step 2: Create compact styles**
+- [x] **Step 2: Create compact styles**
 
 Create `public/styles.css` with:
 
@@ -423,7 +423,7 @@ Create `public/styles.css` with:
 - modal styling;
 - status badges for success, warning, and error states.
 
-- [ ] **Step 3: Implement browser behavior**
+- [x] **Step 3: Implement browser behavior**
 
 Create `public/app.js`:
 
@@ -436,7 +436,7 @@ Create `public/app.js`:
 - render per-app results;
 - refresh app list after deletion only when the user clicks refresh.
 
-- [ ] **Step 4: Run syntax and helper tests**
+- [x] **Step 4: Run syntax and helper tests**
 
 Run:
 
@@ -446,6 +446,8 @@ npm test -- test/ui-state.test.js
 ```
 
 Expected: syntax check and UI helper tests pass.
+
+Evidence: `npm run check && npm test -- test/ui-state.test.js` exited 0. Syntax check passed and 2 UI helper tests passed with 0 failures.
 
 ### Task 6: Documentation, Verification, And Local Server
 

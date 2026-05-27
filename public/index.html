@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>iPhone App Manager</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Local iPhone Utility</p>
+          <h1>iPhone App Manager</h1>
+        </div>
+        <button class="button primary" id="refreshButton" type="button">Refresh</button>
+      </header>
+
+      <section class="status-grid" aria-label="Status">
+        <div class="status-panel">
+          <div class="panel-heading">
+            <h2>Dependencies</h2>
+            <span class="badge" id="dependencyBadge">Checking</span>
+          </div>
+          <div class="status-list" id="dependencyList"></div>
+          <p class="hint" id="dependencyHint"></p>
+        </div>
+
+        <div class="status-panel">
+          <div class="panel-heading">
+            <h2>Device</h2>
+            <span class="badge" id="deviceBadge">Checking</span>
+          </div>
+          <p class="status-copy" id="deviceStatus">Checking for a trusted iPhone.</p>
+          <p class="hint">Connect the iPhone, unlock it, and choose Trust on the phone if prompted.</p>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Installed apps">
+        <div class="toolbar">
+          <label class="search-field">
+            <span>Search</span>
+            <input id="searchInput" type="search" autocomplete="off" placeholder="App name or bundle ID">
+          </label>
+          <div class="toolbar-actions">
+            <button class="button secondary" id="selectVisibleButton" type="button">Select Visible</button>
+            <button class="button secondary" id="clearSelectionButton" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="select-col">Select</th>
+                <th>App</th>
+                <th>Bundle ID</th>
+                <th class="version-col">Version</th>
+              </tr>
+            </thead>
+            <tbody id="appTableBody">
+              <tr>
+                <td colspan="4" class="empty-cell">Loading app list.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="results-panel" id="resultsPanel" hidden>
+        <div class="panel-heading">
+          <h2>Delete Results</h2>
+          <button class="button secondary" id="dismissResultsButton" type="button">Dismiss</button>
+        </div>
+        <div class="result-list" id="resultList"></div>
+      </section>
+    </main>
+
+    <div class="action-bar">
+      <span id="selectedCount">0 selected</span>
+      <button class="button danger" id="deleteButton" type="button" disabled>Delete Selected</button>
+    </div>
+
+    <dialog class="confirm-dialog" id="confirmDialog">
+      <form method="dialog" class="dialog-content">
+        <div>
+          <p class="eyebrow">Confirm Deletion</p>
+          <h2>Delete selected apps?</h2>
+          <p class="warning-copy">Deleting apps removes their local app data from the iPhone.</p>
+        </div>
+        <div class="confirm-list" id="confirmList"></div>
+        <div class="dialog-actions">
+          <button class="button secondary" id="cancelDeleteButton" value="cancel" type="submit">Cancel</button>
+          <button class="button danger" id="confirmDeleteButton" value="confirm" type="button">Delete Apps</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>

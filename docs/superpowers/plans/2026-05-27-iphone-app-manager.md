@@ -13,6 +13,7 @@
 ## File Structure
 
 - Create `package.json`: npm scripts and Express dependency.
+- Create `.gitignore`: ignore generated dependency directories and macOS metadata.
 - Create `src/errors.js`: small HTTP-aware error classes.
 - Create `src/parser.js`: parse `ideviceinstaller -l -o list_user` output into normalized app records.
 - Create `src/validation.js`: validate delete request payloads and normalize bundle IDs.
@@ -35,7 +36,7 @@
 
 - [x] Task 1: Project scaffold and initial failing tests. Status: completed.
 - [x] Task 2: Parser and validation implementation. Status: completed.
-- [ ] Task 3: Device service implementation.
+- [x] Task 3: Device service implementation. Status: completed.
 - [ ] Task 4: Express API implementation.
 - [ ] Task 5: Frontend UI implementation.
 - [ ] Task 6: Documentation, verification, and local server.
@@ -280,7 +281,7 @@ Evidence: `npm test -- test/parser.test.js test/validation.test.js test/ui-state
 - Create: `src/device-service.js`
 - Create: `test/device-service.test.js`
 
-- [ ] **Step 1: Write failing device service tests**
+- [x] **Step 1: Write failing device service tests**
 
 Create `test/device-service.test.js` covering:
 
@@ -290,7 +291,7 @@ Create `test/device-service.test.js` covering:
 - list apps calls `ideviceinstaller -l -o list_user` and parses output;
 - delete apps calls `ideviceinstaller -U <bundleId>` sequentially and records per-app failures.
 
-- [ ] **Step 2: Run device service tests to verify red state**
+- [x] **Step 2: Run device service tests to verify red state**
 
 Run:
 
@@ -300,7 +301,7 @@ npm test -- test/device-service.test.js
 
 Expected: fails because `src/device-service.js` and `src/command-runner.js` do not exist.
 
-- [ ] **Step 3: Implement safe command runner**
+- [x] **Step 3: Implement safe command runner**
 
 Create `src/command-runner.js`:
 
@@ -309,7 +310,7 @@ Create `src/command-runner.js`:
 - resolve `{ stdout, stderr }`;
 - reject with `code`, `stdout`, and `stderr` copied to the error.
 
-- [ ] **Step 4: Implement device service factory**
+- [x] **Step 4: Implement device service factory**
 
 Create `src/device-service.js` with `createDeviceService({ runCommand })`.
 
@@ -320,7 +321,7 @@ Methods:
 - `listApps()`;
 - `deleteApps(selection)`.
 
-- [ ] **Step 5: Run device service tests**
+- [x] **Step 5: Run device service tests**
 
 Run:
 
@@ -329,6 +330,8 @@ npm test -- test/device-service.test.js
 ```
 
 Expected: all device service tests pass.
+
+Evidence: first `npm test -- test/device-service.test.js` exited 1 with expected `ERR_MODULE_NOT_FOUND` for `src/device-service.js`. After implementation, the same command exited 0 with 5 tests passing and 0 failures.
 
 ### Task 4: Express API Implementation
 

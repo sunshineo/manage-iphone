@@ -38,7 +38,7 @@ export function createDeviceService({ runCommand = defaultRunCommand } = {}) {
   }
 
   async function getDeviceStatus() {
-    const { stdout } = await runCommand("idevice_id", ["-l"], { timeout: 10000 });
+    const { stdout } = await runDeviceCommand("idevice_id", ["-l"], { timeout: 10000 });
     const devices = stdout
       .split(/\r?\n/)
       .map((line) => line.trim())
@@ -68,7 +68,7 @@ export function createDeviceService({ runCommand = defaultRunCommand } = {}) {
 
   async function listApps() {
     await requireSingleDevice();
-    const { stdout } = await runCommand("ideviceinstaller", ["-l", "-o", "list_user"], {
+    const { stdout } = await runDeviceCommand("ideviceinstaller", ["list", "--user"], {
       timeout: 30000
     });
 
@@ -82,7 +82,7 @@ export function createDeviceService({ runCommand = defaultRunCommand } = {}) {
 
     for (const app of apps) {
       try {
-        await runCommand("ideviceinstaller", ["-U", app.bundleId], { timeout: 60000 });
+        await runDeviceCommand("ideviceinstaller", ["uninstall", app.bundleId], { timeout: 60000 });
         results.push({
           bundleId: app.bundleId,
           name: app.name,
@@ -102,6 +102,28 @@ export function createDeviceService({ runCommand = defaultRunCommand } = {}) {
     return results;
   }
 
+  async function runDeviceCommand(command, args, options) {
+    try {
+      return await runCommand(command, args, options);
+    } catch (error) {
+      if (isMissingCommandError(error)) {
+        throw new DeviceStateError(
+          `${command} is not installed. Run: ${INSTALL_COMMAND}`,
+          {
+            status: 424,
+            code: "DEPENDENCY_MISSING",
+            details: {
+              command,
+              installCommand: INSTALL_COMMAND
+            }
+          }
+        );
+      }
+
+      throw error;
+    }
+  }
+
   return {
     health,
     getDeviceStatus,
@@ -116,4 +138,8 @@ function commandErrorMessage(error) {
   const message = String(error?.message ?? "").trim();
 
   return stderr || stdout || message || "Command failed";
+}
+
+function isMissingCommandError(error) {
+  return error?.code === "ENOENT";
 }

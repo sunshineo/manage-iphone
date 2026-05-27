@@ -31,13 +31,13 @@ function parseCommaLine(line) {
   }
 
   const [bundleId, version, ...nameParts] = parts;
-  const name = nameParts.join(", ").trim() || bundleId;
+  const name = stripCsvQuotes(nameParts.join(", ").trim()) || bundleId;
 
   return {
     bundleId,
     name,
     raw: line,
-    version: version.trim()
+    version: stripCsvQuotes(version.trim())
   };
 }
 
@@ -92,4 +92,14 @@ function compareApps(left, right) {
 
 function isBundleId(value) {
   return BUNDLE_ID_PATTERN.test(value);
+}
+
+function stripCsvQuotes(value) {
+  const trimmed = value.trim();
+
+  if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+    return trimmed.slice(1, -1);
+  }
+
+  return trimmed;
 }

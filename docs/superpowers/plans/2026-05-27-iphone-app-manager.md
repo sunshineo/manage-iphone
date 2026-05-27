@@ -39,7 +39,7 @@
 - [x] Task 3: Device service implementation. Status: completed.
 - [x] Task 4: Express API implementation. Status: completed.
 - [x] Task 5: Frontend UI implementation. Status: completed.
-- [ ] Task 6: Documentation, verification, and local server.
+- [x] Task 6: Documentation, verification, and local server. Status: completed.
 
 ## Tasks
 
@@ -455,7 +455,7 @@ Evidence: `npm run check && npm test -- test/ui-state.test.js` exited 0. Syntax 
 - Create: `README.md`
 - Modify: `docs/superpowers/plans/2026-05-27-iphone-app-manager.md`
 
-- [ ] **Step 1: Write README**
+- [x] **Step 1: Write README**
 
 Create `README.md` with:
 
@@ -466,7 +466,7 @@ Create `README.md` with:
 - deletion warning;
 - troubleshooting for missing tools and no device.
 
-- [ ] **Step 2: Run full verification**
+- [x] **Step 2: Run full verification**
 
 Run:
 
@@ -477,7 +477,7 @@ npm run check
 
 Expected: all tests and syntax checks pass.
 
-- [ ] **Step 3: Start local server**
+- [x] **Step 3: Start local server**
 
 Run:
 
@@ -487,7 +487,7 @@ npm start
 
 Expected: server listens on `http://localhost:3000`.
 
-- [ ] **Step 4: Verify UI in browser**
+- [x] **Step 4: Verify UI in browser**
 
 Open `http://localhost:3000` and verify:
 
@@ -496,7 +496,7 @@ Open `http://localhost:3000` and verify:
 - table/search controls render without overlapping text;
 - delete button is disabled while no app is selected.
 
-- [ ] **Step 5: Record evidence in this plan**
+- [x] **Step 5: Record evidence in this plan**
 
 Update this plan with:
 
@@ -504,3 +504,14 @@ Update this plan with:
 - verification commands and results;
 - local server URL;
 - known limitation that no real phone deletion was exercised unless a trusted iPhone was connected.
+
+Evidence:
+
+- Files changed: `.gitignore`, `README.md`, `package.json`, `package-lock.json`, `public/app.js`, `public/index.html`, `public/styles.css`, `public/ui-state.js`, `src/app.js`, `src/command-runner.js`, `src/device-service.js`, `src/errors.js`, `src/parser.js`, `src/server.js`, `src/validation.js`, `test/api.test.js`, `test/device-service.test.js`, `test/parser.test.js`, `test/ui-state.test.js`, `test/validation.test.js`, and this plan file.
+- Homebrew install: `brew install libimobiledevice ideviceinstaller` completed successfully and installed `libimobiledevice 1.4.0` and `ideviceinstaller 1.2.0`.
+- Full automated verification: `npm test && npm run check` exited 0 with 21 tests passing and syntax checks passing.
+- Local server: `npm start` served `http://localhost:3000`.
+- Live device verification: `GET /api/health` found both `/opt/homebrew/bin/idevice_id` and `/opt/homebrew/bin/ideviceinstaller`; `GET /api/device` found one trusted connected iPhone; `GET /api/apps` returned 188 user apps.
+- Browser verification: in-app browser loaded `http://localhost:3000`; dependency badge showed `Ready`; device badge showed `Connected`; table rendered 188 rows; delete button was disabled with no selection; selecting one row enabled delete and opened the confirmation dialog; the dialog was cancelled and selection cleared; desktop viewport had no horizontal overflow.
+- Screenshot evidence: local-only verification screenshots were saved under `docs/superpowers/verification/` and ignored by git because they contain the personal app list.
+- Safety limitation: no real app deletion was exercised during verification.

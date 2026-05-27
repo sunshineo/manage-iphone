@@ -48,6 +48,24 @@ test("getDeviceStatus reports no trusted connected devices", async () => {
   });
 });
 
+test("getDeviceStatus reports missing idevice_id as a dependency error", async () => {
+  const service = createDeviceService({
+    runCommand: async () => {
+      const error = new Error("spawn idevice_id ENOENT");
+      error.code = "ENOENT";
+      throw error;
+    }
+  });
+
+  await assert.rejects(
+    () => service.getDeviceStatus(),
+    (error) =>
+      error.status === 424 &&
+      error.code === "DEPENDENCY_MISSING" &&
+      /idevice_id is not installed/.test(error.message)
+  );
+});
+
 test("listApps rejects multiple connected devices", async () => {
   const service = createDeviceService({
     runCommand: async () => ({ stdout: "device-one\ndevice-two\n", stderr: "" })
@@ -70,7 +88,7 @@ test("listApps invokes ideviceinstaller and parses app rows", async () => {
       }
 
       assert.equal(command, "ideviceinstaller");
-      assert.deepEqual(args, ["-l", "-o", "list_user"]);
+      assert.deepEqual(args, ["list", "--user"]);
       return {
         stdout: "Total: 1 apps\ncom.todoist.ios - Todoist 23.4.1\n",
         stderr: ""
@@ -88,8 +106,30 @@ test("listApps invokes ideviceinstaller and parses app rows", async () => {
   ]);
   assert.deepEqual(calls, [
     ["idevice_id", ["-l"]],
-    ["ideviceinstaller", ["-l", "-o", "list_user"]]
+    ["ideviceinstaller", ["list", "--user"]]
   ]);
+});
+
+test("listApps reports missing ideviceinstaller as a dependency error", async () => {
+  const service = createDeviceService({
+    runCommand: async (command) => {
+      if (command === "idevice_id") {
+        return { stdout: "trusted-device\n", stderr: "" };
+      }
+
+      const error = new Error("spawn ideviceinstaller ENOENT");
+      error.code = "ENOENT";
+      throw error;
+    }
+  });
+
+  await assert.rejects(
+    () => service.listApps(),
+    (error) =>
+      error.status === 424 &&
+      error.code === "DEPENDENCY_MISSING" &&
+      /ideviceinstaller is not installed/.test(error.message)
+  );
 });
 
 test("deleteApps uninstalls sequentially and records per-app failures", async () => {
@@ -135,7 +175,7 @@ test("deleteApps uninstalls sequentially and records per-app failures", async ()
 
   assert.deepEqual(calls, [
     ["idevice_id", ["-l"]],
-    ["ideviceinstaller", ["-U", "com.example.ok"]],
-    ["ideviceinstaller", ["-U", "com.example.fail"]]
+    ["ideviceinstaller", ["uninstall", "com.example.ok"]],
+    ["ideviceinstaller", ["uninstall", "com.example.fail"]]
   ]);
 });

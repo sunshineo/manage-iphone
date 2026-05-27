@@ -37,7 +37,7 @@
 - [x] Task 1: Project scaffold and initial failing tests. Status: completed.
 - [x] Task 2: Parser and validation implementation. Status: completed.
 - [x] Task 3: Device service implementation. Status: completed.
-- [ ] Task 4: Express API implementation.
+- [x] Task 4: Express API implementation. Status: completed.
 - [ ] Task 5: Frontend UI implementation.
 - [ ] Task 6: Documentation, verification, and local server.
 
@@ -340,7 +340,7 @@ Evidence: first `npm test -- test/device-service.test.js` exited 1 with expected
 - Create: `src/server.js`
 - Create: `test/api.test.js`
 
-- [ ] **Step 1: Write failing API tests**
+- [x] **Step 1: Write failing API tests**
 
 Create `test/api.test.js` with an in-process HTTP server and injected fake service. Cover:
 
@@ -351,7 +351,7 @@ Create `test/api.test.js` with an in-process HTTP server and injected fake servi
 - validation failure from `POST /api/delete`;
 - static app serving for `/`.
 
-- [ ] **Step 2: Run API tests to verify red state**
+- [x] **Step 2: Run API tests to verify red state**
 
 Run:
 
@@ -361,7 +361,7 @@ npm test -- test/api.test.js
 
 Expected: fails because `src/app.js` does not exist.
 
-- [ ] **Step 3: Implement Express app factory**
+- [x] **Step 3: Implement Express app factory**
 
 Create `src/app.js` with `createApp({ service })`.
 
@@ -372,7 +372,7 @@ Route behavior:
 - Route handlers return JSON.
 - Error middleware maps `AppError.status` to HTTP status and defaults to `500`.
 
-- [ ] **Step 4: Implement server entrypoint**
+- [x] **Step 4: Implement server entrypoint**
 
 Create `src/server.js`:
 
@@ -380,7 +380,7 @@ Create `src/server.js`:
 - listen on `process.env.PORT || 3000`;
 - print local URL.
 
-- [ ] **Step 5: Run API tests**
+- [x] **Step 5: Run API tests**
 
 Run:
 
@@ -389,6 +389,8 @@ npm test -- test/api.test.js
 ```
 
 Expected: all API tests pass.
+
+Evidence: first `npm test -- test/api.test.js` exited 1 with expected `ERR_MODULE_NOT_FOUND` for `src/app.js`. After implementation, the same command exited 0 with 6 tests passing and 0 failures.
 
 ### Task 5: Frontend UI Implementation
 

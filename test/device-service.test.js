@@ -88,9 +88,25 @@ test("listApps invokes ideviceinstaller and parses app rows", async () => {
       }
 
       assert.equal(command, "ideviceinstaller");
-      assert.deepEqual(args, ["list", "--user"]);
+      assert.deepEqual(args, [
+        "list",
+        "--user",
+        "--attribute",
+        "CFBundleIdentifier",
+        "--attribute",
+        "CFBundleShortVersionString",
+        "--attribute",
+        "CFBundleDisplayName",
+        "--attribute",
+        "StaticDiskUsage",
+        "--attribute",
+        "DynamicDiskUsage"
+      ]);
       return {
-        stdout: "Total: 1 apps\ncom.todoist.ios - Todoist 23.4.1\n",
+        stdout: [
+          "CFBundleIdentifier, CFBundleShortVersionString, CFBundleDisplayName, StaticDiskUsage, DynamicDiskUsage",
+          "com.todoist.ios, \"23.4.1\", \"Todoist\", 1000, 2000"
+        ].join("\n"),
         stderr: ""
       };
     },
@@ -100,14 +116,33 @@ test("listApps invokes ideviceinstaller and parses app rows", async () => {
   assert.deepEqual(await service.listApps(), [
     {
       bundleId: "com.todoist.ios",
+      dynamicDiskUsageBytes: 2000,
       name: "Todoist",
-      raw: "com.todoist.ios - Todoist 23.4.1",
+      raw: "com.todoist.ios, \"23.4.1\", \"Todoist\", 1000, 2000",
+      staticDiskUsageBytes: 1000,
+      storageBytes: 3000,
       version: "23.4.1"
     }
   ]);
   assert.deepEqual(calls, [
     ["idevice_id", ["-l"]],
-    ["ideviceinstaller", ["list", "--user"]]
+    [
+      "ideviceinstaller",
+      [
+        "list",
+        "--user",
+        "--attribute",
+        "CFBundleIdentifier",
+        "--attribute",
+        "CFBundleShortVersionString",
+        "--attribute",
+        "CFBundleDisplayName",
+        "--attribute",
+        "StaticDiskUsage",
+        "--attribute",
+        "DynamicDiskUsage"
+      ]
+    ]
   ]);
 });
 

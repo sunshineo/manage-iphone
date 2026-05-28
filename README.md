@@ -1,8 +1,8 @@
 # iPhone App Manager
 
-Mac-local utility for listing user-installed apps on a trusted personal iPhone and deleting selected apps in a batch.
+Mac-local utility for listing user-installed apps on a trusted personal iPhone, showing their local storage use, and deleting selected apps in a batch.
 
-The tool runs on your Mac. To explain what each app does, it looks up App Store metadata from Apple by bundle identifier and shows a short purpose summary in the app table.
+The tool runs on your Mac. It asks the iPhone for each app's installed-app and user-data disk usage. To explain what each app does, it also looks up App Store metadata from Apple by bundle identifier and shows a short purpose summary in the app table.
 
 ## Requirements
 

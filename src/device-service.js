@@ -6,6 +6,13 @@ import { normalizeDeleteSelection } from "./validation.js";
 
 const REQUIRED_COMMANDS = ["idevice_id", "ideviceinstaller"];
 const INSTALL_COMMAND = "brew install libimobiledevice ideviceinstaller";
+const APP_LIST_ATTRIBUTES = [
+  "CFBundleIdentifier",
+  "CFBundleShortVersionString",
+  "CFBundleDisplayName",
+  "StaticDiskUsage",
+  "DynamicDiskUsage"
+];
 
 export function createDeviceService({
   runCommand = defaultRunCommand,
@@ -72,9 +79,17 @@ export function createDeviceService({
 
   async function listApps() {
     await requireSingleDevice();
-    const { stdout } = await runDeviceCommand("ideviceinstaller", ["list", "--user"], {
-      timeout: 30000
-    });
+    const { stdout } = await runDeviceCommand(
+      "ideviceinstaller",
+      [
+        "list",
+        "--user",
+        ...APP_LIST_ATTRIBUTES.flatMap((attribute) => ["--attribute", attribute])
+      ],
+      {
+        timeout: 30000
+      }
+    );
 
     return metadataClient.enrichApps(parseAppList(stdout));
   }

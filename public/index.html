@@ -38,31 +38,26 @@
       </section>
 
       <section class="workspace" aria-label="Installed apps">
-        <div class="toolbar">
-          <label class="search-field">
-            <span>Search</span>
-            <input id="searchInput" type="search" autocomplete="off" placeholder="App name or bundle ID">
-          </label>
-          <div class="toolbar-actions">
-            <button class="button secondary" id="selectVisibleButton" type="button">Select Visible</button>
-            <button class="button secondary" id="clearSelectionButton" type="button">Clear</button>
-          </div>
+        <div class="table-summary" aria-live="polite">
+          <span id="appCountSummary">0 apps</span>
+          <span id="totalStorageSummary">0 B total storage</span>
         </div>
 
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th class="select-col">Select</th>
-                <th>App</th>
+                <th class="select-col">
+                  <button class="table-clear-button" id="clearSelectionButton" type="button" disabled>Clear</button>
+                </th>
+                <th class="app-col">App</th>
                 <th>What it does</th>
-                <th>Bundle ID</th>
-                <th class="version-col">Version</th>
+                <th class="storage-col">Storage</th>
               </tr>
             </thead>
             <tbody id="appTableBody">
               <tr>
-                <td colspan="5" class="empty-cell">Loading app list.</td>
+                <td colspan="4" class="empty-cell">Loading app list.</td>
               </tr>
             </tbody>
           </table>

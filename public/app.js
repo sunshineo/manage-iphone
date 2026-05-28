@@ -1,11 +1,10 @@
-import { filterApps, nextSelection } from "./ui-state.js";
+import { appStorageSummary, formatStorageSize, nextSelection } from "./ui-state.js";
 
 const state = {
   apps: [],
   health: null,
   device: null,
   selected: new Set(),
-  query: "",
   loading: false,
   deleting: false,
   message: ""
@@ -18,8 +17,8 @@ const elements = {
   dependencyHint: document.querySelector("#dependencyHint"),
   deviceBadge: document.querySelector("#deviceBadge"),
   deviceStatus: document.querySelector("#deviceStatus"),
-  searchInput: document.querySelector("#searchInput"),
-  selectVisibleButton: document.querySelector("#selectVisibleButton"),
+  appCountSummary: document.querySelector("#appCountSummary"),
+  totalStorageSummary: document.querySelector("#totalStorageSummary"),
   clearSelectionButton: document.querySelector("#clearSelectionButton"),
   appTableBody: document.querySelector("#appTableBody"),
   selectedCount: document.querySelector("#selectedCount"),
@@ -33,16 +32,6 @@ const elements = {
 };
 
 elements.refreshButton.addEventListener("click", () => refreshAll());
-elements.searchInput.addEventListener("input", () => {
-  state.query = elements.searchInput.value;
-  renderApps();
-});
-elements.selectVisibleButton.addEventListener("click", () => {
-  for (const app of visibleApps()) {
-    state.selected.add(app.bundleId);
-  }
-  renderApps();
-});
 elements.clearSelectionButton.addEventListener("click", () => {
   state.selected.clear();
   renderApps();
@@ -203,7 +192,8 @@ function renderDevice() {
 }
 
 function renderApps() {
-  const apps = visibleApps();
+  const apps = state.apps;
+  renderAppSummary();
   elements.appTableBody.replaceChildren();
 
   if (state.loading) {
@@ -216,8 +206,6 @@ function renderApps() {
     renderEmptyRow("Connect and trust one iPhone to list apps.");
   } else if (state.apps.length === 0) {
     renderEmptyRow("No user-installed apps were returned by the device tool.");
-  } else if (apps.length === 0) {
-    renderEmptyRow("No apps match the current search.");
   } else {
     for (const app of apps) {
       elements.appTableBody.append(createAppRow(app));
@@ -225,6 +213,14 @@ function renderApps() {
   }
 
   renderActions();
+}
+
+function renderAppSummary() {
+  const { appCount, totalStorageBytes } = appStorageSummary(state.apps);
+  elements.appCountSummary.textContent = `${appCount.toLocaleString()} ${
+    appCount === 1 ? "app" : "apps"
+  }`;
+  elements.totalStorageSummary.textContent = `${formatStorageSize(totalStorageBytes)} total storage`;
 }
 
 function createAppRow(app) {
@@ -247,10 +243,6 @@ function createAppRow(app) {
   name.textContent = app.name || app.bundleId;
   appCell.append(name);
 
-  const bundleCell = document.createElement("td");
-  bundleCell.className = "bundle-id";
-  bundleCell.textContent = app.bundleId;
-
   const purposeCell = document.createElement("td");
   purposeCell.className = "purpose-cell";
   const purposeText = document.createElement("span");
@@ -261,17 +253,31 @@ function createAppRow(app) {
     : "No App Store metadata found for this bundle ID.";
   purposeCell.append(purposeText);
 
-  const versionCell = document.createElement("td");
-  versionCell.textContent = app.version || "-";
+  const storageCell = document.createElement("td");
+  storageCell.className = "storage-cell";
+  storageCell.textContent = formatStorageSize(app.storageBytes);
+  storageCell.title = storageTitle(app);
 
-  row.append(selectCell, appCell, purposeCell, bundleCell, versionCell);
+  row.append(selectCell, appCell, purposeCell, storageCell);
   return row;
+}
+
+function storageTitle(app) {
+  if (app.storageBytes === null || app.storageBytes === undefined) {
+    return "Storage size is unavailable for this app.";
+  }
+
+  return [
+    `Total: ${formatStorageSize(app.storageBytes)}`,
+    `App: ${formatStorageSize(app.staticDiskUsageBytes)}`,
+    `Data: ${formatStorageSize(app.dynamicDiskUsageBytes)}`
+  ].join(" · ");
 }
 
 function renderEmptyRow(message) {
   const row = document.createElement("tr");
   const cell = document.createElement("td");
-  cell.colSpan = 5;
+  cell.colSpan = 4;
   cell.className = "empty-cell";
   cell.textContent = message;
   row.append(cell);
@@ -283,7 +289,6 @@ function renderActions() {
   elements.selectedCount.textContent = `${count} selected`;
   elements.deleteButton.disabled = count === 0 || state.deleting;
   elements.deleteButton.textContent = state.deleting ? "Deleting..." : "Delete Selected";
-  elements.selectVisibleButton.disabled = visibleApps().length === 0 || state.loading;
   elements.clearSelectionButton.disabled = count === 0 || state.loading;
   elements.refreshButton.disabled = state.loading || state.deleting;
 }
@@ -332,10 +337,6 @@ function renderResults(results) {
     })
   );
   elements.resultsPanel.hidden = false;
-}
-
-function visibleApps() {
-  return filterApps(state.apps, state.query);
 }
 
 function dependenciesAvailable() {

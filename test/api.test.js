@@ -135,6 +135,38 @@ test("GET / serves an HTML app shell", async () => {
   assert.match(response.text, /iPhone App Manager/);
 });
 
+test("GET / serves app table headers without the version column", async () => {
+  const response = await requestWithApp(
+    createApp({ service: {} }),
+    "/",
+    {
+      parseJson: false
+    }
+  );
+
+  assert.equal(response.status, 200);
+  assert.match(response.text, /<th class="app-col">App<\/th>/);
+  assert.match(response.text, /<th class="storage-col">Storage<\/th>/);
+  assert.doesNotMatch(response.text, /<th[^>]*>Version<\/th>/);
+});
+
+test("GET / serves summary and clear control without search controls", async () => {
+  const response = await requestWithApp(
+    createApp({ service: {} }),
+    "/",
+    {
+      parseJson: false
+    }
+  );
+
+  assert.equal(response.status, 200);
+  assert.match(response.text, /id="appCountSummary"/);
+  assert.match(response.text, /id="totalStorageSummary"/);
+  assert.match(response.text, /id="clearSelectionButton"/);
+  assert.doesNotMatch(response.text, /id="searchInput"/);
+  assert.doesNotMatch(response.text, /id="selectVisibleButton"/);
+});
+
 async function requestWithApp(app, path, options = {}) {
   const server = app.listen(0);
 

@@ -43,6 +43,9 @@
 - [x] Task 6: Documentation, verification, and local server. Status: completed.
 - [x] Task 7: Automatic App Store metadata enrichment. Status: completed.
 - [x] Task 8: Show full purpose text in app table. Status: completed.
+- [x] Task 9: Show app storage size instead of bundle ID. Status: completed.
+- [x] Task 10: Sort by storage and simplify app table columns. Status: completed.
+- [x] Task 11: Remove table search controls and show app/storage totals. Status: completed.
 
 ## Tasks
 
@@ -578,3 +581,92 @@ Evidence: after reload, browser measurement checked the first 60 rendered `.purp
 - [x] **Step 4: Run syntax verification**
 
 Evidence: `npm run check` exited 0.
+
+### Task 9: Show App Storage Size Instead Of Bundle ID
+
+**Files:**
+- Modify: `src/device-service.js`
+- Modify: `src/parser.js`
+- Modify: `public/app.js`
+- Modify: `public/index.html`
+- Modify: `public/styles.css`
+- Modify: `public/ui-state.js`
+- Modify: `test/device-service.test.js`
+- Modify: `test/parser.test.js`
+- Modify: `test/ui-state.test.js`
+- Modify: `README.md`
+- Modify: `docs/superpowers/plans/2026-05-27-iphone-app-manager.md`
+
+- [x] **Step 1: Verify storage attributes are available**
+
+Evidence: `man ideviceinstaller` lists `StaticDiskUsage` as installed-app disk usage and `DynamicDiskUsage` as app user data disk usage. The local tool accepts `--attribute` options; a live run could not return app data because no iPhone was connected at that moment.
+
+- [x] **Step 2: Write failing tests**
+
+Evidence: `node --test test/parser.test.js test/device-service.test.js test/ui-state.test.js` exited 1 with expected failures for the old `ideviceinstaller list --user` arguments, missing disk-usage parsing, and missing `formatStorageSize` export.
+
+- [x] **Step 3: Implement storage collection and rendering**
+
+Evidence: `src/device-service.js` now requests `CFBundleIdentifier`, `CFBundleShortVersionString`, `CFBundleDisplayName`, `StaticDiskUsage`, and `DynamicDiskUsage`. `src/parser.js` parses app bytes, data bytes, and total bytes. The app table now renders a `Storage` column instead of the visible `Bundle ID` column.
+
+- [x] **Step 4: Verify focused tests**
+
+Evidence: `node --test test/parser.test.js test/device-service.test.js test/ui-state.test.js` exited 0 with 14 tests passing.
+
+- [x] **Step 5: Run full verification and browser checks**
+
+Evidence: `npm test` exited 0 with 28 tests passing. `npm run check` exited 0. Browser verification on `http://127.0.0.1:3000` found the desktop table headers `Select`, `App`, `What it does`, `Storage`, and `Version`; `Bundle ID` was absent; there was no horizontal overflow. Mobile-width verification showed visible headers `Select`, `App`, and `Storage` with no horizontal overflow.
+
+### Task 10: Sort By Storage And Simplify App Table Columns
+
+**Files:**
+- Modify: `src/parser.js`
+- Modify: `public/app.js`
+- Modify: `public/index.html`
+- Modify: `public/styles.css`
+- Modify: `test/parser.test.js`
+- Modify: `test/api.test.js`
+- Modify: `docs/superpowers/plans/2026-05-27-iphone-app-manager.md`
+
+- [x] **Step 1: Write failing tests**
+
+Evidence: `node --test test/parser.test.js test/api.test.js` exited 1 with expected failures for alphabetical app sorting and the still-present `Version` table header.
+
+- [x] **Step 2: Implement table changes**
+
+Evidence: `src/parser.js` now sorts apps with known `storageBytes` from largest to smallest, falling back to name and bundle ID for ties or missing storage. The app table now renders four columns: `Select`, `App`, `What it does`, and `Storage`. The `App` header has an `app-col` width of 180px on desktop and 150px on mobile.
+
+- [x] **Step 3: Verify automated checks**
+
+Evidence: focused `node --test test/parser.test.js test/api.test.js` exited 0 with 11 tests passing. Full `npm test && npm run check && git diff --check` exited 0 with 30 tests passing, syntax checks passing, and no whitespace errors.
+
+- [x] **Step 4: Verify live browser**
+
+Evidence: after restarting the `manage-iphone` tmux server and reloading the in-app browser, the rendered table headers were `Select`, `App`, `What it does`, and `Storage`; `Version` was absent; rows had four cells; the app column measured 180px; there was no horizontal overflow. The first five live rows were `WeChat` (`30 GB`), `Overcast` (`9.3 GB`), `YouTube` (`4.9 GB`), `rednote` (`2 GB`), and `Chrome` (`1.6 GB`), and the first 12 visible rows were sorted by storage descending.
+
+### Task 11: Remove Table Search Controls And Show App/Storage Totals
+
+**Files:**
+- Modify: `public/app.js`
+- Modify: `public/index.html`
+- Modify: `public/styles.css`
+- Modify: `public/ui-state.js`
+- Modify: `test/api.test.js`
+- Modify: `test/ui-state.test.js`
+- Modify: `docs/superpowers/plans/2026-05-27-iphone-app-manager.md`
+
+- [x] **Step 1: Write failing tests**
+
+Evidence: `node --test test/ui-state.test.js test/api.test.js` exited 1 with expected failures for missing `appStorageSummary` export and still-present search/select-visible markup.
+
+- [x] **Step 2: Implement summary and control layout**
+
+Evidence: the search bar and `Select Visible` button were removed. The `Clear` button moved into the select table header. A table summary now renders `appCountSummary` and `totalStorageSummary`. Search filtering state and the unused filter helper were removed.
+
+- [x] **Step 3: Verify automated checks**
+
+Evidence: focused `node --test test/ui-state.test.js test/api.test.js` exited 0 with 12 tests passing. Full `npm test && npm run check && git diff --check` exited 0 with 31 tests passing, syntax checks passing, and no whitespace errors.
+
+- [x] **Step 4: Verify live browser**
+
+Evidence: reloading the in-app browser at `http://localhost:3000` showed `82 apps` and `56 GB total storage`. Headers were `Clear`, `App`, `What it does`, and `Storage`; search input and `Select Visible` button were absent; `Clear` was in the select header; there was no horizontal overflow. Selecting one row changed the footer to `1 selected` and enabled `Clear`; pressing `Clear` returned to `0 selected`, unchecked all rows, and disabled `Clear`.

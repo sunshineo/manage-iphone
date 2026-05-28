@@ -24,21 +24,34 @@ function parseLine(line) {
 }
 
 function parseCommaLine(line) {
-  const parts = line.split(",").map((part) => part.trim());
+  const parts = parseCsvFields(line);
 
   if (parts.length < 3 || !isBundleId(parts[0])) {
     return null;
   }
 
-  const [bundleId, version, ...nameParts] = parts;
-  const name = stripCsvQuotes(nameParts.join(", ").trim()) || bundleId;
-
-  return {
+  const [bundleId, version, nameField, staticDiskUsage, dynamicDiskUsage] = parts;
+  const name = stripCsvQuotes(nameField).trim() || bundleId;
+  const app = {
     bundleId,
     name,
     raw: line,
     version: stripCsvQuotes(version.trim())
   };
+
+  if (parts.length >= 5) {
+    const staticDiskUsageBytes = parseDiskUsageBytes(staticDiskUsage);
+    const dynamicDiskUsageBytes = parseDiskUsageBytes(dynamicDiskUsage);
+
+    return {
+      ...app,
+      dynamicDiskUsageBytes,
+      staticDiskUsageBytes,
+      storageBytes: sumDiskUsageBytes(staticDiskUsageBytes, dynamicDiskUsageBytes)
+    };
+  }
+
+  return app;
 }
 
 function parseDashLine(line) {
@@ -84,14 +97,75 @@ function splitNameAndVersion(value) {
 }
 
 function compareApps(left, right) {
+  const leftStorage = sortableStorageBytes(left);
+  const rightStorage = sortableStorageBytes(right);
+
+  if (leftStorage !== rightStorage) {
+    return rightStorage - leftStorage;
+  }
+
   return (
     left.name.localeCompare(right.name, undefined, { sensitivity: "base" }) ||
     left.bundleId.localeCompare(right.bundleId, undefined, { sensitivity: "base" })
   );
 }
 
+function sortableStorageBytes(app) {
+  return Number.isFinite(app.storageBytes) ? app.storageBytes : -1;
+}
+
 function isBundleId(value) {
   return BUNDLE_ID_PATTERN.test(value);
+}
+
+function parseCsvFields(line) {
+  const fields = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+    const nextChar = line[index + 1];
+
+    if (char === '"' && inQuotes && nextChar === '"') {
+      current += '"';
+      index += 1;
+    } else if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === "," && !inQuotes) {
+      fields.push(current.trim());
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+
+  fields.push(current.trim());
+  return fields;
+}
+
+function parseDiskUsageBytes(value) {
+  const normalized = stripCsvQuotes(String(value ?? "")).trim();
+
+  if (!normalized) {
+    return null;
+  }
+
+  const number = Number(normalized);
+
+  if (!Number.isFinite(number) || number < 0) {
+    return null;
+  }
+
+  return number;
+}
+
+function sumDiskUsageBytes(staticDiskUsageBytes, dynamicDiskUsageBytes) {
+  if (staticDiskUsageBytes === null && dynamicDiskUsageBytes === null) {
+    return null;
+  }
+
+  return (staticDiskUsageBytes ?? 0) + (dynamicDiskUsageBytes ?? 0);
 }
 
 function stripCsvQuotes(value) {

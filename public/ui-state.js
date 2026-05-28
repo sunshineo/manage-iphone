@@ -8,7 +8,12 @@ export function filterApps(apps, query) {
   return apps.filter((app) => {
     const name = String(app.name ?? "").toLocaleLowerCase();
     const bundleId = String(app.bundleId ?? "").toLocaleLowerCase();
-    return name.includes(normalizedQuery) || bundleId.includes(normalizedQuery);
+    const purpose = String(app.purpose ?? "").toLocaleLowerCase();
+    return (
+      name.includes(normalizedQuery) ||
+      bundleId.includes(normalizedQuery) ||
+      purpose.includes(normalizedQuery)
+    );
   });
 }
 

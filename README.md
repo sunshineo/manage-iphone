@@ -2,7 +2,7 @@
 
 Mac-local utility for listing user-installed apps on a trusted personal iPhone and deleting selected apps in a batch.
 
-The tool runs only on your Mac. It does not send app or device data to a cloud service.
+The tool runs on your Mac. To explain what each app does, it looks up App Store metadata from Apple by bundle identifier and shows a short purpose summary in the app table.
 
 ## Requirements
 

@@ -251,17 +251,27 @@ function createAppRow(app) {
   bundleCell.className = "bundle-id";
   bundleCell.textContent = app.bundleId;
 
+  const purposeCell = document.createElement("td");
+  purposeCell.className = "purpose-cell";
+  const purposeText = document.createElement("span");
+  purposeText.className = "purpose-text";
+  purposeText.textContent = app.purpose || "No App Store metadata found.";
+  purposeCell.title = app.metadata?.found
+    ? `${app.metadata.genre || "App Store"} · ${app.metadata.sellerName || app.metadata.appStoreName}`
+    : "No App Store metadata found for this bundle ID.";
+  purposeCell.append(purposeText);
+
   const versionCell = document.createElement("td");
   versionCell.textContent = app.version || "-";
 
-  row.append(selectCell, appCell, bundleCell, versionCell);
+  row.append(selectCell, appCell, purposeCell, bundleCell, versionCell);
   return row;
 }
 
 function renderEmptyRow(message) {
   const row = document.createElement("tr");
   const cell = document.createElement("td");
-  cell.colSpan = 4;
+  cell.colSpan = 5;
   cell.className = "empty-cell";
   cell.textContent = message;
   row.append(cell);

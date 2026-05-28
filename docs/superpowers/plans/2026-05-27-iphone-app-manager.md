@@ -19,6 +19,7 @@
 - Create `src/validation.js`: validate delete request payloads and normalize bundle IDs.
 - Create `src/command-runner.js`: safe `execFile` wrapper with timeouts.
 - Create `src/device-service.js`: dependency checks, device detection, app listing, and sequential uninstall operations.
+- Create `src/app-store-metadata.js`: batch App Store lookup by bundle ID, cache metadata, and summarize app purpose.
 - Create `src/app.js`: Express app factory and API route handlers.
 - Create `src/server.js`: local server entrypoint.
 - Create `public/index.html`: working app UI.
@@ -40,6 +41,7 @@
 - [x] Task 4: Express API implementation. Status: completed.
 - [x] Task 5: Frontend UI implementation. Status: completed.
 - [x] Task 6: Documentation, verification, and local server. Status: completed.
+- [x] Task 7: Automatic App Store metadata enrichment. Status: completed.
 
 ## Tasks
 
@@ -515,3 +517,41 @@ Evidence:
 - Browser verification: in-app browser loaded `http://localhost:3000`; dependency badge showed `Ready`; device badge showed `Connected`; table rendered 188 rows; delete button was disabled with no selection; selecting one row enabled delete and opened the confirmation dialog; the dialog was cancelled and selection cleared; desktop viewport had no horizontal overflow.
 - Screenshot evidence: local-only verification screenshots were saved under `docs/superpowers/verification/` and ignored by git because they contain the personal app list.
 - Safety limitation: no real app deletion was exercised during verification.
+
+### Task 7: Automatic App Store Metadata Enrichment
+
+**Files:**
+- Create: `src/app-store-metadata.js`
+- Create: `test/app-store-metadata.test.js`
+- Modify: `src/device-service.js`
+- Modify: `public/index.html`
+- Modify: `public/app.js`
+- Modify: `public/styles.css`
+- Modify: `public/ui-state.js`
+- Modify: `test/device-service.test.js`
+- Modify: `test/ui-state.test.js`
+- Modify: `README.md`
+
+- [x] **Step 1: Verify App Store lookup shape**
+
+Evidence: `curl 'https://itunes.apple.com/lookup?bundleId=com.openai.chat&country=us'` returned one result with `trackName`, `bundleId`, `sellerName`, `primaryGenreName`, and `description`. A comma-separated `bundleId` lookup returned two results for `com.openai.chat,com.google.Maps`, so the implementation uses batched lookups.
+
+- [x] **Step 2: Write failing metadata tests**
+
+Evidence: `npm test -- test/app-store-metadata.test.js` exited 1 with expected `ERR_MODULE_NOT_FOUND` for `src/app-store-metadata.js`.
+
+- [x] **Step 3: Implement metadata enrichment**
+
+Evidence: `src/app-store-metadata.js` now batch-fetches App Store metadata by bundle ID, caches results in memory, produces a concise `purpose`, and keeps the app list usable if the metadata lookup fails.
+
+- [x] **Step 4: Wire enrichment into app listing**
+
+Evidence: `src/device-service.js` now calls `metadataClient.enrichApps(parseAppList(stdout))`; `test/device-service.test.js` verifies enriched list output with an injected metadata client.
+
+- [x] **Step 5: Render purpose in the UI**
+
+Evidence: the table now includes a `What it does` column. Search matches app name, bundle ID, and purpose text. Long purpose text is clamped to two lines to keep rows stable.
+
+- [x] **Step 6: Verify focused tests**
+
+Evidence: `npm test -- test/device-service.test.js test/app-store-metadata.test.js` exited 0 with 11 tests passing. `npm run check && npm test -- test/ui-state.test.js` exited 0 with syntax checks passing and 2 UI helper tests passing.

@@ -93,7 +93,8 @@ test("listApps invokes ideviceinstaller and parses app rows", async () => {
         stdout: "Total: 1 apps\ncom.todoist.ios - Todoist 23.4.1\n",
         stderr: ""
       };
-    }
+    },
+    metadataClient: noOpMetadataClient()
   });
 
   assert.deepEqual(await service.listApps(), [
@@ -110,6 +111,54 @@ test("listApps invokes ideviceinstaller and parses app rows", async () => {
   ]);
 });
 
+test("listApps enriches parsed apps with App Store metadata", async () => {
+  const service = createDeviceService({
+    runCommand: async (command) => {
+      if (command === "idevice_id") {
+        return { stdout: "trusted-device\n", stderr: "" };
+      }
+
+      return {
+        stdout: "Total: 1 apps\ncom.todoist.ios - Todoist 23.4.1\n",
+        stderr: ""
+      };
+    },
+    metadataClient: {
+      enrichApps: async (apps) =>
+        apps.map((app) => ({
+          ...app,
+          purpose: "Capture and organize personal tasks.",
+          metadata: {
+            source: "appStore",
+            found: true,
+            appStoreName: "Todoist",
+            sellerName: "Doist Inc.",
+            genre: "Productivity",
+            url: "https://apps.apple.com/us/app/todoist/id1"
+          }
+        }))
+    }
+  });
+
+  assert.deepEqual(await service.listApps(), [
+    {
+      bundleId: "com.todoist.ios",
+      name: "Todoist",
+      raw: "com.todoist.ios - Todoist 23.4.1",
+      version: "23.4.1",
+      purpose: "Capture and organize personal tasks.",
+      metadata: {
+        source: "appStore",
+        found: true,
+        appStoreName: "Todoist",
+        sellerName: "Doist Inc.",
+        genre: "Productivity",
+        url: "https://apps.apple.com/us/app/todoist/id1"
+      }
+    }
+  ]);
+});
+
 test("listApps reports missing ideviceinstaller as a dependency error", async () => {
   const service = createDeviceService({
     runCommand: async (command) => {
@@ -120,7 +169,8 @@ test("listApps reports missing ideviceinstaller as a dependency error", async ()
       const error = new Error("spawn ideviceinstaller ENOENT");
       error.code = "ENOENT";
       throw error;
-    }
+    },
+    metadataClient: noOpMetadataClient()
   });
 
   await assert.rejects(
@@ -149,7 +199,8 @@ test("deleteApps uninstalls sequentially and records per-app failures", async ()
       }
 
       return { stdout: "Complete\n", stderr: "" };
-    }
+    },
+    metadataClient: noOpMetadataClient()
   });
 
   assert.deepEqual(
@@ -179,3 +230,9 @@ test("deleteApps uninstalls sequentially and records per-app failures", async ()
     ["ideviceinstaller", ["uninstall", "com.example.fail"]]
   ]);
 });
+
+function noOpMetadataClient() {
+  return {
+    enrichApps: async (apps) => apps
+  };
+}

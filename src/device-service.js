@@ -1,3 +1,4 @@
+import { createAppStoreMetadataClient } from "./app-store-metadata.js";
 import { runCommand as defaultRunCommand } from "./command-runner.js";
 import { DeviceStateError } from "./errors.js";
 import { parseAppList } from "./parser.js";
@@ -6,7 +7,10 @@ import { normalizeDeleteSelection } from "./validation.js";
 const REQUIRED_COMMANDS = ["idevice_id", "ideviceinstaller"];
 const INSTALL_COMMAND = "brew install libimobiledevice ideviceinstaller";
 
-export function createDeviceService({ runCommand = defaultRunCommand } = {}) {
+export function createDeviceService({
+  runCommand = defaultRunCommand,
+  metadataClient = createAppStoreMetadataClient()
+} = {}) {
   async function health() {
     const entries = await Promise.all(
       REQUIRED_COMMANDS.map(async (command) => {
@@ -72,7 +76,7 @@ export function createDeviceService({ runCommand = defaultRunCommand } = {}) {
       timeout: 30000
     });
 
-    return parseAppList(stdout);
+    return metadataClient.enrichApps(parseAppList(stdout));
   }
 
   async function deleteApps(selection) {

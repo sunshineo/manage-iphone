@@ -314,12 +314,8 @@ tbody tr:hover {
 }
 
 .purpose-text {
-  display: -webkit-box;
-  max-height: 2.6em;
-  overflow: hidden;
+  display: block;
   line-height: 1.3;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 
 .empty-cell {

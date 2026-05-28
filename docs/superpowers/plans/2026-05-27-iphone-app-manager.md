@@ -42,6 +42,7 @@
 - [x] Task 5: Frontend UI implementation. Status: completed.
 - [x] Task 6: Documentation, verification, and local server. Status: completed.
 - [x] Task 7: Automatic App Store metadata enrichment. Status: completed.
+- [x] Task 8: Show full purpose text in app table. Status: completed.
 
 ## Tasks
 
@@ -555,3 +556,25 @@ Evidence: the table now includes a `What it does` column. Search matches app nam
 - [x] **Step 6: Verify focused tests**
 
 Evidence: `npm test -- test/device-service.test.js test/app-store-metadata.test.js` exited 0 with 11 tests passing. `npm run check && npm test -- test/ui-state.test.js` exited 0 with syntax checks passing and 2 UI helper tests passing.
+
+### Task 8: Show Full Purpose Text In App Table
+
+**Files:**
+- Modify: `public/styles.css`
+- Modify: `docs/superpowers/plans/2026-05-27-iphone-app-manager.md`
+
+- [x] **Step 1: Reproduce clipping**
+
+Evidence: browser measurement on `http://localhost:3000` found `.purpose-text` elements with `scrollHeight` greater than `clientHeight`; examples included ABRP, AEA Browser, AEA Verify, Airbnb, and Airside. CSS had an explicit `max-height: 2.6em` and `-webkit-line-clamp: 2`.
+
+- [x] **Step 2: Remove the line clamp**
+
+Evidence: `public/styles.css` changed `.purpose-text` from a two-line clamped box to a normal block with `line-height: 1.3`, allowing table rows to grow to fit the full text.
+
+- [x] **Step 3: Verify in browser**
+
+Evidence: after reload, browser measurement checked the first 60 rendered `.purpose-text` elements; `clippedCount` was `0`, first row height expanded to `58.59375`, and `horizontalOverflow` was `false`.
+
+- [x] **Step 4: Run syntax verification**
+
+Evidence: `npm run check` exited 0.
